@@ -7,6 +7,10 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 public class LoginFormController {
     public Button btnConnect;
     public Button btnExit;
@@ -16,8 +20,27 @@ public class LoginFormController {
     public TextField txtHost;
 
     public void btnConnect_OnAction(ActionEvent actionEvent) {
+        if (isValidInputs()) {
+
+            try {
+               Process mysql= new ProcessBuilder("mysql",
+                        "-h", txtHost.getText(),
+                        "u", txtUserName.getText(),
+                        "--port", txtPort.getText(),
+                        "-p",
+                        "-e", "exit").start();
+
+                mysql.getOutputStream().write(txtPassword.getText().getBytes());
+                mysql.getOutputStream().close();
+                mysql.waitFor();
 
 
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private boolean isValidInputs() {
