@@ -10,6 +10,10 @@ public class MysqlClientShellFormController {
     public TextArea txtOutput;
     public Button btnRun;
 
+    public void initData(String host, String port, String username, String password){
+
+    }
+
     public void txtCommand_OnAction(ActionEvent actionEvent) {
         btnRun.fire();
     }

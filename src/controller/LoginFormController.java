@@ -1,6 +1,8 @@
 package controller;
 
 import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
@@ -26,7 +28,7 @@ public class LoginFormController {
             try {
                Process mysql= new ProcessBuilder("mysql",
                         "-h", txtHost.getText(),
-                        "u", txtUserName.getText(),
+                        "-u", txtUserName.getText(),
                         "--port", txtPort.getText(),
                         "-p",
                         "-e", "exit").start();
@@ -36,6 +38,7 @@ public class LoginFormController {
                 int exitCode = mysql.waitFor();
 
                 if (exitCode != 0) {
+                    System.out.println(exitCode);
                     InputStream es = mysql.getErrorStream();
                     byte[] buffer = new byte[es.available()];
                     es.read(buffer);
@@ -50,6 +53,17 @@ public class LoginFormController {
 
                     txtUserName.requestFocus();
                     txtPassword.selectAll();
+                }else{
+                    Stage stage = new Stage();
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/mysqlClientShellForm.fxml"));
+                    MysqlClientShellFormController controller = fxmlLoader.getController();
+                    stage.setScene(new Scene(fxmlLoader.load()));
+                    stage.setTitle("MySql client Shell");
+                    stage.setResizable(false);
+                    stage.centerOnScreen();
+                    stage.show();
+
+                    ((Stage) btnConnect.getScene().getWindow()).close();
                 }
 
 
