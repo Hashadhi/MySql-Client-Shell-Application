@@ -1,5 +1,6 @@
 package controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,6 +22,8 @@ public class LoginFormController {
     public TextField txtUserName;
     public TextField txtPort;
     public TextField txtHost;
+
+    public void initialize(){ Platform.runLater(()->txtUserName.requestFocus());}
 
     public void btnConnect_OnAction(ActionEvent actionEvent) {
         if (isValidInputs()) {
@@ -57,6 +60,7 @@ public class LoginFormController {
                     Stage stage = new Stage();
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/mysqlClientShellForm.fxml"));
                     MysqlClientShellFormController controller = fxmlLoader.getController();
+                    controller.initData(txtHost.getText(), txtPort.getText(), txtUserName.getText(), txtPassword.getText());
                     stage.setScene(new Scene(fxmlLoader.load()));
                     stage.setTitle("MySql client Shell");
                     stage.setResizable(false);
@@ -65,7 +69,6 @@ public class LoginFormController {
 
                     ((Stage) btnConnect.getScene().getWindow()).close();
                 }
-
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -99,5 +102,5 @@ public class LoginFormController {
         return true;
     }
 
-    public void btnExit_OnAction(ActionEvent actionEvent) {((Stage) btnConnect.getScene().getWindow()).close();}
+    public void btnExit_OnAction(ActionEvent actionEvent) {System.exit(0);}
 }
