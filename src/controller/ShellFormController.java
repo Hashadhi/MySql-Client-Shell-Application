@@ -45,7 +45,7 @@ public class ShellFormController {
             mysqlBuilder.redirectErrorStream(true);
             this.mysql = mysqlBuilder.start();
 
-
+            processInputStream(mysql.getInputStream());
 
             mysql.getOutputStream().write((password+"\n").getBytes());
             mysql.getOutputStream().flush();
@@ -92,37 +92,61 @@ public class ShellFormController {
                 lblCurrentSchema.setText("SCHEMA" + matcher.group("db"));
                 txtOutput.setText("Database changed");
                 lblCurrentSchema.setTextFill(Paint.valueOf("blue"));
-
-            }
-
-
-            if (is.available() != 0) {
-                byte[] buffer = new byte[is.available()];
-                is.read(buffer);
-                txtOutput.setText(new String(buffer));
-                System.out.println("is");
-
-            }
-
-            if (es.available() != 0) {
-                byte[] buffer = new byte[is.available()];
-                es.read(buffer);
-                txtOutput.setText(new String(buffer));
-                System.out.println("es");
-                this.mysql.getOutputStream().write((password + "\n").getBytes());
-                this.mysql.getOutputStream().flush();
             }
 
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
 
+    private void processInputStream(InputStream is) {
+        new Thread(()->{
+            try {
+                while (true) {
+                    byte[] buffer = new byte[1024];
+                    int read = is.read(buffer);
 
-        txtCommand.selectAll();
+                    if (read == -1) {
+                        break;
+                    }
 
+                    String output = new String(buffer, 0, read);
+                    Platform.runLater(()->{
+
+                        /*A little hack*/
+                        if (txtOutput.getText().contentEquals("Enter password: ")) {
+                            txtOutput.clear();
+                            txtOutput.setText("Welcome to MySQL Client Shell\n" +
+                                    "----------------------------------------------\n\n" +
+                                    "Please enter your command to proceed. \nThank you! \uD83D\uDE09" +
+                                    "\n\nCopyright © 2022 Hashadhi Jayasinghe. All Rights Reserved. \n");
+                        }
+                    });
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public void txtCommand_OnAction(ActionEvent actionEvent) {
         btnExecute.fire();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
