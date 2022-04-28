@@ -8,12 +8,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 public class LoginFormController {
     public Button btnConnect;
@@ -23,7 +23,8 @@ public class LoginFormController {
     public TextField txtPort;
     public TextField txtHost;
 
-    public void initialize(){ Platform.runLater(()->txtUserName.requestFocus());}
+    public void initialize(){
+        Platform.runLater(()->txtUserName.requestFocus());}
 
     public void btnConnect_OnAction(ActionEvent actionEvent) {
         if (isValidInputs()) {
@@ -57,17 +58,22 @@ public class LoginFormController {
                     txtUserName.requestFocus();
                     txtPassword.selectAll();
                 }else{
-                    Stage stage = new Stage();
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/mysqlClientShellForm.fxml"));
-                    MysqlClientShellFormController controller = fxmlLoader.getController();
-                    controller.initData(txtHost.getText(), txtPort.getText(), txtUserName.getText(), txtPassword.getText());
-                    stage.setScene(new Scene(fxmlLoader.load()));
-                    stage.setTitle("MySql client Shell");
-                    stage.setResizable(false);
+                    FXMLLoader fxmlLoader = new FXMLLoader(this.getClass().getResource("/view/ShellForm.fxml"));
+                    AnchorPane root = fxmlLoader.load();
+                    Scene shellScene = new Scene(root);
+                    Stage stage = (Stage) txtUserName.getScene().getWindow();
+                    stage.setScene(shellScene);
                     stage.centerOnScreen();
-                    stage.show();
+                    stage.setResizable(true);
+                    stage.setTitle("MySQL Client Shell");
+                    Platform.runLater(stage::sizeToScene);
 
-                    ((Stage) btnConnect.getScene().getWindow()).close();
+                    ShellFormController controller = fxmlLoader.getController();
+                    controller.initData(txtHost.getText(),
+                            txtPort.getText(),
+                            txtUserName.getText(),
+                            txtPassword.getText());
+
                 }
 
             } catch (IOException e) {
