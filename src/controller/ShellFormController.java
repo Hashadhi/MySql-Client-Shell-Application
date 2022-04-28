@@ -37,9 +37,14 @@ public class ShellFormController {
                     "--port", port,
                     "-n",
                     "-p",
-                    "-v");
+                    "-v",
+                    "-L",
+                    "-f");
 
+            mysqlBuilder.redirectErrorStream(true);
             this.mysql = mysqlBuilder.start();
+
+
 
             mysql.getOutputStream().write((password+"\n").getBytes());
             mysql.getOutputStream().flush();
@@ -57,6 +62,7 @@ public class ShellFormController {
             if (mysql.isAlive()) {
                 this.mysql.destroyForcibly();
             }
+            Platform.exit();
         }
     }
 
@@ -68,12 +74,16 @@ public class ShellFormController {
                 statement += ";";
             }
 
+            txtOutput.clear();
+
+            if (statement.equalsIgnoreCase("exit")) {
+                Platform.exit();
+                return;
+            }
+
             this.mysql.getOutputStream().write((statement +"\n").getBytes());
-//            this.mysql.getOutputStream().flush();
-
-            is = mysql.getInputStream();
-            es = mysql.getErrorStream();
-
+            this.mysql.getOutputStream().flush();
+            txtCommand.selectAll();
 
 
             if (is.available() != 0) {
