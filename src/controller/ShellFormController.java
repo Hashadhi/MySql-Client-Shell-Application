@@ -2,18 +2,19 @@ package controller;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.paint.Paint;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ShellFormController {
     public TextField txtCommand;
+    public Button btnExecute;
     public TextArea txtOutput;
-    public Button btnRun;
+    public Label lblCurrentSchema;
     private Process mysql;
     private InputStream is;
     private InputStream es;
@@ -85,6 +86,15 @@ public class ShellFormController {
             this.mysql.getOutputStream().flush();
             txtCommand.selectAll();
 
+            Pattern pattern = Pattern.compile(".*[;]?((?i)(use)) (?<db>[A-Za-z0-9-_]+);.*");
+            Matcher matcher = pattern.matcher(statement);
+            if (matcher.matches()) {
+                lblCurrentSchema.setText("SCHEMA" + matcher.group("db"));
+                txtOutput.setText("Database changed");
+                lblCurrentSchema.setTextFill(Paint.valueOf("blue"));
+
+            }
+
 
             if (is.available() != 0) {
                 byte[] buffer = new byte[is.available()];
@@ -113,6 +123,6 @@ public class ShellFormController {
     }
 
     public void txtCommand_OnAction(ActionEvent actionEvent) {
-        btnRun.fire();
+        btnExecute.fire();
     }
 }
