@@ -16,9 +16,7 @@ public class ShellFormController {
     public TextArea txtOutput;
     public Label lblCurrentSchema;
     private Process mysql;
-    private InputStream is;
-    private InputStream es;
-    private String password;
+
 
     public void initialize(){
         Platform.runLater(()-> txtCommand.requestFocus());
@@ -27,7 +25,6 @@ public class ShellFormController {
 
 
     public void initData(String host, String port, String username, String password) {
-        this.password = password;
         try {
 
 //            -n --> flush buffer after each query
@@ -40,15 +37,17 @@ public class ShellFormController {
                     "-p",
                     "-v",
                     "-L",
-                    "-f");
+                    "-f",
+                    "-v",
+                    "-v");
 
             mysqlBuilder.redirectErrorStream(true);
             this.mysql = mysqlBuilder.start();
 
             processInputStream(mysql.getInputStream());
 
-            mysql.getOutputStream().write((password+"\n").getBytes());
-            mysql.getOutputStream().flush();
+            this.mysql.getOutputStream().write((password+"\n").getBytes());
+            this.mysql.getOutputStream().flush();
 
             txtCommand.getScene().getWindow().setOnCloseRequest(event -> {
                 if (this.mysql.isAlive()) {
@@ -100,7 +99,7 @@ public class ShellFormController {
     }
 
     private void processInputStream(InputStream is) {
-        new Thread(()->{
+        Thread thread = new Thread(()->{
             try {
                 while (true) {
                     byte[] buffer = new byte[1024];
@@ -112,6 +111,7 @@ public class ShellFormController {
 
                     String output = new String(buffer, 0, read);
                     Platform.runLater(()->{
+                        txtOutput.appendText(output);
 
                         /*A little hack*/
                         if (txtOutput.getText().contentEquals("Enter password: ")) {
@@ -127,6 +127,8 @@ public class ShellFormController {
                 e.printStackTrace();
             }
         });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public void txtCommand_OnAction(ActionEvent actionEvent) {
